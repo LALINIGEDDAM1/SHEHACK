@@ -104,6 +104,13 @@
                                     <option value="MCQ">MCQ</option>
                                 </select>
                             </div>
+
+                            <div class="form-group">
+                                <label for="lite_mode">
+                                    <i class="fas fa-feather-alt"></i> Lite Mode (faster, lower accuracy)
+                                </label>
+                                <input type="checkbox" id="lite_mode" name="lite_mode" value="1">
+                            </div>
                         </div>
 
                         <div class="form-actions">
@@ -206,6 +213,7 @@
             formData.append('syllabus', syllabusFile);
             formData.append('num_questions', document.getElementById('num_questions').value);
             formData.append('question_type', document.getElementById('question_type').value);
+            formData.append('lite_mode', document.getElementById('lite_mode').checked ? '1' : '0');
             
             debugLog('Sending request to /generate', { 
                 num_questions: document.getElementById('num_questions').value,

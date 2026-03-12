@@ -94,9 +94,30 @@ lstm_model = SimpleLSTMAnalyzer()
 
 # ============= Helper Functions =============
 
-def extract_text_from_pdf(pdf_file):
+def extract_text_from_pdf(pdf_file, lite_mode=False):
     text = ""
     try:
+        if lite_mode:
+            try:
+                import pypdfium2 as pdfium
+                pdf = pdfium.PdfDocument(pdf_file)
+                for i in range(min(len(pdf), MAX_PDF_PAGES)):
+                    page = pdf[i]
+                    try:
+                        textpage = page.get_textpage()
+                        page_text = textpage.get_text_range() or ""
+                    except Exception:
+                        page_text = ""
+                    if page_text:
+                        text += page_text
+                    if len(text) >= MAX_TEXT_CHARS:
+                        text = text[:MAX_TEXT_CHARS]
+                        break
+                pdf.close()
+                return text
+            except Exception as e:
+                print(f"Lite mode PDF extract failed, falling back: {e}")
+
         with pdfplumber.open(pdf_file) as pdf:
             for i, page in enumerate(pdf.pages):
                 if i >= MAX_PDF_PAGES:
@@ -306,6 +327,7 @@ def generate_question_bank():
         syllabus = request.files.get('syllabus')
         num_questions = int(request.form.get('num_questions', 20))
         question_type = request.form.get('question_type', 'Theory')
+        lite_mode = request.form.get('lite_mode', '0') == '1'
         
         if not textbook or not syllabus:
             return jsonify({'error': 'Please upload both PDFs'}), 400
@@ -315,8 +337,8 @@ def generate_question_bank():
         textbook.save(textbook_path)
         syllabus.save(syllabus_path)
         
-        textbook_text = extract_text_from_pdf(textbook_path)
-        syllabus_text = extract_text_from_pdf(syllabus_path)
+        textbook_text = extract_text_from_pdf(textbook_path, lite_mode=lite_mode)
+        syllabus_text = extract_text_from_pdf(syllabus_path, lite_mode=lite_mode)
         
         if not textbook_text or not syllabus_text:
             return jsonify({'error': 'Could not extract text from PDFs. Try smaller files or fewer pages.'}), 400
