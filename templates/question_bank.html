@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Bank Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .page-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 30px; }
+        .page-header h1, .page-header .step-description { color: #fff; }
+        .back-link { color: white; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 15px; }
+        .back-link:hover { opacity: 0.9; }
+        h1 { margin: 0 0 10px 0; font-size: 32px; }
+        .step-description { margin: 0; opacity: 0.9; font-size: 16px; }
+        main { padding: 30px; }
+        .form-container { max-width: 900px; margin: 0 auto; }
+        .config-section { background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%); border-radius: 15px; padding: 25px; margin-bottom: 25px; }
+        .config-section h3 { margin: 0 0 15px 0; color: #1e3c72; display: flex; align-items: center; gap: 10px; font-size: 20px; }
+        .section-hint { color: #666; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        .form-group input[type="file"], .form-group input[type="number"], .form-group select { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 15px; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #2a5298; }
+        .form-actions { display: flex; gap: 15px; justify-content: center; margin-top: 30px; }
+        .btn-primary, .btn-secondary, .btn-success { padding: 16px 32px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(30, 60, 114, 0.4); }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-success:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(17, 153, 142, 0.4); }
+        .loading-container { text-align: center; padding: 80px 20px; }
+        .spinner { width: 80px; height: 80px; border: 6px solid #f3f3f3; border-top: 6px solid #1e3c72; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 30px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-note { background: #d4edda; padding: 15px; border-radius: 10px; color: #155724; margin-top: 20px; }
+        .table-responsive { overflow-x: auto; margin-top: 20px; }
+        .questions-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        .questions-table th, .questions-table td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        .questions-table th { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; font-weight: 600; font-size: 14px; }
+        .questions-table tr:hover { background: #f8f9fa; }
+        .editable-cell { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 14px; }
+        .editable-cell:focus { outline: none; border-color: #2a5298; }
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
+        .btn-delete:hover { background: #c82333; }
+        .questions-count { background: #d1ecf1; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; color: #0c5460; font-weight: 600; }
+        .error-message { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <a href="{{ url_for('home') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Previous Page
+            </a>
+            <h1><i class="fas fa-book-open"></i> Question Bank Generator</h1>
+            <p class="step-description">Upload textbook and syllabus PDFs to generate a question bank using AI</p>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <!-- Upload Section -->
+                <div id="uploadSection">
+                    <form id="generateForm">
+                        <div class="config-section">
+                            <h3><i class="fas fa-file-pdf"></i> Upload Documents</h3>
+                            <p class="section-hint">Upload your textbook and syllabus to generate questions</p>
+                            
+                            <div class="form-group">
+                                <label for="textbook">
+                                    <i class="fas fa-book"></i> Textbook PDF
+                                </label>
+                                <input type="file" id="textbook" name="textbook" accept=".pdf" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="syllabus">
+                                    <i class="fas fa-list-alt"></i> Syllabus PDF
+                                </label>
+                                <input type="file" id="syllabus" name="syllabus" accept=".pdf" required>
+                            </div>
+                        </div>
+
+                        <div class="config-section">
+                            <h3><i class="fas fa-cog"></i> Configuration</h3>
+                            
+                            <div class="form-group">
+                                <label for="num_questions">
+                                    <i class="fas fa-hashtag"></i> Number of Questions
+                                </label>
+                                <input type="number" id="num_questions" name="num_questions" min="5" max="100" value="20" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="question_type">
+                                    <i class="fas fa-list-ul"></i> Question Type
+                                </label>
+                                <select id="question_type" name="question_type">
+                                    <option value="Theory">Theory</option>
+                                    <option value="MCQ">MCQ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a href="{{ url_for('home') }}" class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Previous Page
+                            </a>
+                            <button type="submit" class="btn-primary" id="generateBtn">
+                                <i class="fas fa-magic"></i> Generate Questions
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Loading Section -->
+                <div id="loadingSection" style="display: none;">
+                    <div class="loading-container">
+                        <div class="spinner"></div>
+                        <h3>Generating Questions...</h3>
+                        <p>Please wait while our AI analyzes your documents and generates questions</p>
+                        <p class="loading-note"><i class="fas fa-info-circle"></i> Questions will be equally distributed across all categories</p>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" style="display: none;">
+                    <div class="config-section">
+                        <h3><i class="fas fa-check-circle"></i> Generated Questions</h3>
+                        <p class="section-hint">Edit any field in the table below. All categories are equally distributed.</p>
+                        <div class="questions-count" id="questionsCount"></div>
+                        
+                        <div class="table-responsive">
+                            <table class="questions-table" id="questionsTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">S.No</th>
+                                        <th style="width: 250px;">Question</th>
+                                        <th style="width: 80px;">Marks</th>
+                                        <th style="width: 120px;">RBT Level</th>
+                                        <th style="width: 100px;">Difficulty</th>
+                                        <th style="width: 80px;">CO</th>
+                                        <th style="width: 120px;">Topic</th>
+                                        <th style="width: 80px;">Unit</th>
+                                        <th style="width: 60px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="questionsList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="regenerate()">
+                            <i class="fas fa-redo"></i> Regenerate
+                        </button>
+                        <button class="btn-success" onclick="downloadCSV()">
+                            <i class="fas fa-download"></i> Download CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let generatedQuestions = [];
+        
+        // Debug function
+        function debugLog(message, data) {
+            console.log('[DEBUG] ' + message, data);
+        }
+        
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('DOM Loaded, setting up form handler');
+            
+            const form = document.getElementById('generateForm');
+            if (form) {
+                form.addEventListener('submit', handleFormSubmit);
+                debugLog('Form handler attached');
+            } else {
+                debugLog('Form not found!');
+            }
+        });
+        
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            debugLog('Form submitted');
+            
+            const textbookFile = document.getElementById('textbook').files[0];
+            const syllabusFile = document.getElementById('syllabus').files[0];
+            
+            if (!textbookFile || !syllabusFile) {
+                alert('Please upload both textbook and syllabus PDFs');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('textbook', textbookFile);
+            formData.append('syllabus', syllabusFile);
+            formData.append('num_questions', document.getElementById('num_questions').value);
+            formData.append('question_type', document.getElementById('question_type').value);
+            
+            debugLog('Sending request to /generate', { 
+                num_questions: document.getElementById('num_questions').value,
+                question_type: document.getElementById('question_type').value 
+            });
+            
+            // Show loading
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('loadingSection').style.display = 'block';
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                debugLog('Response status:', response.status);
+                
+                const data = await response.json();
+                debugLog('API Response received:', data);
+                
+                if (data.error) {
+                    debugLog('Error in response:', data.error);
+                    alert('Error: ' + data.error);
+                    document.getElementById('uploadSection').style.display = 'block';
+                    document.getElementById('loadingSection').style.display = 'none';
+                } else if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+                    debugLog('Questions received:', data.questions.length);
+                    generatedQuestions = data.questions;
+                    
+                    // Call display function
+                    displayQuestions(generatedQuestions);
+                    
+                    // Show results
+                    document.getElementById('loadingSection').style.display = 'none';
+                    document.getElementById('resultsSection').style.display = 'block';
+                    debugLog('Results section shown');
+                } else {
+                    debugLog('No questions in response');
+                    alert('No questions generated. Please try again.');
+                    document.getElementById('uploadSection').style.display = 'block';
+                    document.getElementById('loadingSection').style.display = 'none';
+                }
+            } catch (error) {
+                debugLog('Fetch error:', error);
+                alert('Failed to generate questions: ' + error.message);
+                document.getElementById('uploadSection').style.display = 'block';
+                document.getElementById('loadingSection').style.display = 'none';
+            }
+        }
+        
+        function displayQuestions(questions) {
+            debugLog('displayQuestions called with', questions.length, 'questions');
+            
+            const list = document.getElementById('questionsList');
+            const countDiv = document.getElementById('questionsCount');
+            
+            if (!list || !countDiv) {
+                debugLog('ERROR: Elements not found');
+                return;
+            }
+            
+            countDiv.textContent = 'Total Questions Generated: ' + questions.length;
+            list.innerHTML = '';
+            
+            questions.forEach(function(q, i) {
+                debugLog('Processing question', i, q);
+                
+                const row = document.createElement('tr');
+                row.dataset.index = i;
+                const rbtLevel = String(q.rbt_level ?? '').toLowerCase();
+                const difficulty = String(q.difficulty ?? '').toLowerCase();
+                const co = String(q.co ?? '').toUpperCase();
+                
+                row.innerHTML = '<td>' + (i + 1) + '</td>' +
+                    '<td><textarea class="editable-cell" data-field="question" rows="2">' + (q.question || '') + '</textarea></td>' +
+                    '<td><select class="editable-cell" data-field="marks">' +
+                        '<option value="2" ' + (q.marks == 2 ? 'selected' : '') + '>2</option>' +
+                        '<option value="5" ' + (q.marks == 5 ? 'selected' : '') + '>5</option>' +
+                        '<option value="10" ' + (q.marks == 10 ? 'selected' : '') + '>10</option>' +
+                        '<option value="15" ' + (q.marks == 15 ? 'selected' : '') + '>15</option>' +
+                        '<option value="20" ' + (q.marks == 20 ? 'selected' : '') + '>20</option>' +
+                    '</select></td>' +
+                    '<td><select class="editable-cell" data-field="rbt_level">' +
+                        '<option value="Remembering" ' + (rbtLevel === 'remembering' ? 'selected' : '') + '>Remembering</option>' +
+                        '<option value="Understanding" ' + (rbtLevel === 'understanding' ? 'selected' : '') + '>Understanding</option>' +
+                        '<option value="Applying" ' + (rbtLevel === 'applying' ? 'selected' : '') + '>Applying</option>' +
+                        '<option value="Analyzing" ' + (rbtLevel === 'analyzing' ? 'selected' : '') + '>Analyzing</option>' +
+                        '<option value="Evaluating" ' + (rbtLevel === 'evaluating' ? 'selected' : '') + '>Evaluating</option>' +
+                        '<option value="Creating" ' + (rbtLevel === 'creating' ? 'selected' : '') + '>Creating</option>' +
+                    '</select></td>' +
+                    '<td><select class="editable-cell" data-field="difficulty">' +
+                        '<option value="Easy" ' + (difficulty === 'easy' ? 'selected' : '') + '>Easy</option>' +
+                        '<option value="Medium" ' + (difficulty === 'medium' ? 'selected' : '') + '>Medium</option>' +
+                        '<option value="Hard" ' + (difficulty === 'hard' ? 'selected' : '') + '>Hard</option>' +
+                    '</select></td>' +
+                    '<td><select class="editable-cell" data-field="co">' +
+                        '<option value="CO1" ' + (co === 'CO1' ? 'selected' : '') + '>CO1</option>' +
+                        '<option value="CO2" ' + (co === 'CO2' ? 'selected' : '') + '>CO2</option>' +
+                        '<option value="CO3" ' + (co === 'CO3' ? 'selected' : '') + '>CO3</option>' +
+                        '<option value="CO4" ' + (co === 'CO4' ? 'selected' : '') + '>CO4</option>' +
+                        '<option value="CO5" ' + (co === 'CO5' ? 'selected' : '') + '>CO5</option>' +
+                    '</select></td>' +
+                    '<td><input type="text" class="editable-cell" data-field="topic" value="' + (q.topic || '') + '" placeholder="Topic name"></td>' +
+                    '<td><select class="editable-cell" data-field="unit">' +
+                        '<option value="1" ' + (q.unit == 1 ? 'selected' : '') + '>Unit 1</option>' +
+                        '<option value="2" ' + (q.unit == 2 ? 'selected' : '') + '>Unit 2</option>' +
+                        '<option value="3" ' + (q.unit == 3 ? 'selected' : '') + '>Unit 3</option>' +
+                        '<option value="4" ' + (q.unit == 4 ? 'selected' : '') + '>Unit 4</option>' +
+                        '<option value="5" ' + (q.unit == 5 ? 'selected' : '') + '>Unit 5</option>' +
+                    '</select></td>' +
+                    '<td><button type="button" class="btn-delete" onclick="deleteQuestion(' + i + ')"><i class="fas fa-trash"></i></button></td>';
+                
+                list.appendChild(row);
+            });
+            
+            debugLog('Questions rendered successfully');
+            
+            // Add event listeners for editable cells
+            document.querySelectorAll('.editable-cell').forEach(function(cell) {
+                cell.addEventListener('change', function() {
+                    const row = this.closest('tr');
+                    const index = parseInt(row.dataset.index);
+                    const field = this.dataset.field;
+                    let value = this.value;
+                    
+                    if (field === 'marks' || field === 'unit') {
+                        value = parseInt(value);
+                    }
+                    
+                    generatedQuestions[index][field] = value;
+                    debugLog('Updated question', index, field, value);
+                });
+            });
+        }
+        
+        function deleteQuestion(index) {
+            if (confirm('Are you sure you want to delete this question?')) {
+                generatedQuestions.splice(index, 1);
+                displayQuestions(generatedQuestions);
+            }
+        }
+        
+        function regenerate() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+        }
+        
+        function downloadCSV() {
+            let csv = 'S.No,Question,Marks,RBT Level,Difficulty,CO,Topic,Unit,Type\n';
+            generatedQuestions.forEach(function(q, i) {
+                const question = (q.question || '').replace(/"/g, '""');
+                csv += (i + 1) + ',"' + question + '",' + (q.marks || 5) + ',' + (q.rbt_level || 'Understanding') + ',' + (q.difficulty || 'Medium') + ',' + (q.co || 'CO1') + ',' + (q.topic || '') + ',' + (q.unit || 1) + ',' + (q.question_type || 'Theory') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'question_bank.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+    </script>
+</body>
+</html>
+

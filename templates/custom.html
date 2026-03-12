@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Distribution - Step 5</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Upload CSV</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Configure</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Header Info</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step active">
+                <div class="step-icon"><i class="fas fa-user-cog"></i></div>
+                <span>Custom %</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">6</div>
+                <span>Results</span>
+            </div>
+
+        <header class="page-header">
+            <a href="{{ url_for('step3_options') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Previous Page
+            </a>
+            <h1><i class="fas fa-sliders-h"></i> Custom Distribution Settings</h1>
+            <p class="step-description">Step 4 of 5 - Set your custom percentages for difficulty and RBT levels</p>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <form method="POST" class="custom-form">
+                    
+                    <!-- Configuration Summary -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-info-circle"></i> Configuration Summary</h3>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <i class="fas fa-hashtag"></i>
+                                <div>
+                                    <strong>Number of Questions:</strong>
+                                    <span>{{ num_questions }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Difficulty Distribution -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-signal"></i> Difficulty Distribution (%)</h3>
+                        <p class="section-hint">Set the percentage for each difficulty level</p>
+                        
+                        <div class="range-sliders">
+                            <div class="range-item">
+                                <div class="range-header">
+                                    <label>
+                                        <span class="difficulty-badge easy">Easy</span>
+                                    </label>
+                                    <span class="range-value" id="easy_value">33%</span>
+                                </div>
+                                <input type="range" id="easy_pct" name="easy_pct" 
+                                       min="0" max="100" value="33" class="range-slider">
+                            </div>
+
+                            <div class="range-item">
+                                <div class="range-header">
+                                    <label>
+                                        <span class="difficulty-badge medium">Medium</span>
+                                    </label>
+                                    <span class="range-value" id="medium_value">34%</span>
+                                </div>
+                                <input type="range" id="medium_pct" name="medium_pct" 
+                                       min="0" max="100" value="34" class="range-slider">
+                            </div>
+
+                            <div class="range-item">
+                                <div class="range-header">
+                                    <label>
+                                        <span class="difficulty-badge hard">Hard</span>
+                                    </label>
+                                    <span class="range-value" id="hard_value">33%</span>
+                                </div>
+                                <input type="range" id="hard_pct" name="hard_pct" 
+                                       min="0" max="100" value="33" class="range-slider">
+                            </div>
+                        </div>
+                        
+                        <div class="total-percentage">
+                            Total: <span id="total_difficulty">100</span>% 
+                            <span class="warning" id="difficulty_warning" style="display: none;">
+                                <i class="fas fa-exclamation-triangle"></i> Total should be 100%
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- RBT Level Distribution -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-brain"></i> RBT Level Distribution (%)</h3>
+                        <p class="section-hint">Bloom's Taxonomy levels distribution</p>
+                        
+                        <div class="rbt-grid">
+                            <div class="rbt-item">
+                                <div class="rbt-header">
+                                    <label for="remembering_pct">
+                                        <span class="rbt-badge" style="background: #667eea;">R</span>
+                                        Remembering
+                                    </label>
+                                    <span class="range-value" id="remembering_value">17%</span>
+                                </div>
+                                <input type="range" id="remembering_pct" name="remembering_pct" 
+                                       min="0" max="100" value="17" class="range-slider">
+                            </div>
+
+                            <div class="rbt-item">
+                                <div class="rbt-header">
+                                    <label for="understanding_pct">
+                                        <span class="rbt-badge" style="background: #764ba2;">U</span>
+                                        Understanding
+                                    </label>
+                                    <span class="range-value" id="understanding_value">17%</span>
+                                </div>
+                                <input type="range" id="understanding_pct" name="understanding_pct" 
+                                       min="0" max="100" value="17" class="range-slider">
+                            </div>
+
+                            <div class="rbt-item">
+                                <div class="rbt-header">
+                                    <label for="applying_pct">
+                                        <span class="rbt-badge" style="background: #f59e0b;">Ap</span>
+                                        Applying
+                                    </label>
+                                    <span class="range-value" id="applying_value">17%</span>
+                                </div>
+                                <input type="range" id="applying_pct" name="applying_pct" 
+                                       min="0" max="100" value="17" class="range-slider">
+                            </div>
+
+                            <div class="rbt-item">
+                                <div class="rbt-header">
+                                    <label for="analyzing_pct">
+                                        <span class="rbt-badge" style="background: #10b981;">An</span>
+                                        Analyzing
+                                    </label>
+                                    <span class="range-value" id="analyzing_value">17%</span>
+                                </div>
+                                <input type="range" id="analyzing_pct" name="analyzing_pct" 
+                                       min="0" max="100" value="17" class="range-slider">
+                            </div>
+
+                            <div class="rbt-item">
+                                <div class="rbt-header">
+                                    <label for="evaluating_pct">
+                                        <span class="rbt-badge" style="background: #ef4444;">E</span>
+                                        Evaluating
+                                    </label>
+                                    <span class="range-value" id="evaluating_value">16%</span>
+                                </div>
+                                <input type="range" id="evaluating_pct" name="evaluating_pct" 
+                                       min="0" max="100" value="16" class="range-slider">
+                            </div>
+
+                            <div class="rbt-item">
+                                <div class="rbt-header">
+                                    <label for="creating_pct">
+                                        <span class="rbt-badge" style="background: #ec4899;">C</span>
+                                        Creating
+                                    </label>
+                                    <span class="range-value" id="creating_value">16%</span>
+                                </div>
+                                <input type="range" id="creating_pct" name="creating_pct" 
+                                       min="0" max="100" value="16" class="range-slider">
+                            </div>
+                        </div>
+                        
+                        <div class="total-percentage">
+                            Total: <span id="total_rbt">100</span>% 
+                            <span class="warning" id="rbt_warning" style="display: none;">
+                                <i class="fas fa-exclamation-triangle"></i> Total should be 100%
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons - Beside Each Other -->
+                    <div class="form-actions">
+                        <a href="{{ url_for('step3_options') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Previous Page
+                        </a>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-check"></i> Generate Question Paper
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Difficulty sliders
+        const easySlider = document.getElementById('easy_pct');
+        const mediumSlider = document.getElementById('medium_pct');
+        const hardSlider = document.getElementById('hard_pct');
+        
+        const easyValue = document.getElementById('easy_value');
+        const mediumValue = document.getElementById('medium_value');
+        const hardValue = document.getElementById('hard_value');
+        
+        const totalDifficulty = document.getElementById('total_difficulty');
+        const difficultyWarning = document.getElementById('difficulty_warning');
+
+        function updateDifficultyValues() {
+            easyValue.textContent = easySlider.value + '%';
+            mediumValue.textContent = mediumSlider.value + '%';
+            hardValue.textContent = hardSlider.value + '%';
+            
+            const total = parseInt(easySlider.value) + parseInt(mediumSlider.value) + parseInt(hardSlider.value);
+            totalDifficulty.textContent = total;
+            
+            if (total !== 100) {
+                difficultyWarning.style.display = 'inline';
+            } else {
+                difficultyWarning.style.display = 'none';
+            }
+        }
+
+        easySlider.addEventListener('input', updateDifficultyValues);
+        mediumSlider.addEventListener('input', updateDifficultyValues);
+        hardSlider.addEventListener('input', updateDifficultyValues);
+
+        // RBT sliders
+        const rbtSliders = ['remembering', 'understanding', 'applying', 'analyzing', 'evaluating', 'creating'];
+        const totalRbt = document.getElementById('total_rbt');
+        const rbtWarning = document.getElementById('rbt_warning');
+
+        function updateRbtValues() {
+            let total = 0;
+            rbtSliders.forEach(slider => {
+                const value = parseInt(document.getElementById(slider + '_pct').value);
+                document.getElementById(slider + '_value').textContent = value + '%';
+                total += value;
+            });
+            
+            totalRbt.textContent = total;
+            
+            if (total !== 100) {
+                rbtWarning.style.display = 'inline';
+            } else {
+                rbtWarning.style.display = 'none';
+            }
+        }
+
+        rbtSliders.forEach(slider => {
+            document.getElementById(slider + '_pct').addEventListener('input', updateRbtValues);
+        });
+    </script>
+</body>
+</html>
+

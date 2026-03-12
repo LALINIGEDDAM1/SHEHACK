@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Question Paper - Step 4</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Upload CSV</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Configure</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Header Info</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step active">
+                <div class="step-icon"><i class="fas fa-cog fa-spin"></i></div>
+                <span>Generate</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">5</div>
+                <span>Results</span>
+            </div>
+
+        <header class="page-header">
+            <a href="{{ url_for('step3_options') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Previous Page
+            </a>
+            <h1><i class="fas fa-cog fa-spin"></i> Generate Question Paper</h1>
+            <p class="step-description">Step 4 of 5 - Review settings and optionally upload previous year papers</p>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <form method="POST" class="generate-form" id="generateForm">
+                    <!-- Auto-Balanced Distribution Info -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-balance-scale"></i> Auto-Balanced Distribution</h3>
+                        <p class="section-hint">Your question paper will be generated with equal distribution</p>
+                        
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <i class="fas fa-signal"></i>
+                                <div>
+                                    <strong>Difficulty:</strong>
+                                    <span>Easy: 33% | Medium: 34% | Hard: 33%</span>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-brain"></i>
+                                <div>
+                                    <strong>RBT Levels:</strong>
+                                    <span>All 6 levels equally covered (~17% each)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Previous Year Papers -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-history"></i> Previous Year Papers (Optional)</h3>
+                        <p class="section-hint">Upload previous 2 years question papers to avoid repeating questions using LSTM analysis</p>
+                        
+                        <div class="upload-area-wrapper">
+                            <div class="file-drop-zone multiple" id="dropZone">
+                                <input type="file" name="previous_papers" id="previousPapers" accept=".pdf" multiple>
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h3>Drag & Drop previous year PDFs</h3>
+                                <p>or click to browse (multiple files allowed)</p>
+                                <div class="file-types">
+                                    <span class="file-badge">PDF</span>
+                                </div>
+                            </div>
+                            
+                            <div class="file-list" id="fileList" style="display: none;">
+                                <div class="file-list-header">
+                                    <span>Selected Files:</span>
+                                    <button type="button" class="btn-clear-all" id="clearAll">Clear All</button>
+                                </div>
+                                <div class="file-items" id="fileItems"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="lstm-info">
+                            <i class="fas fa-brain"></i>
+                            <span><strong>LSTM Analysis:</strong> Our LSTM model will analyze previous questions and ensure no similar questions appear in the generated paper.</span>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-info-circle"></i> Configuration Summary</h3>
+                        
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <i class="fas fa-hashtag"></i>
+                                <div>
+                                    <strong>Number of Questions:</strong>
+                                    <span>{{ session.get('num_questions', 10) }}</span>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-university"></i>
+                                <div>
+                                    <strong>College:</strong>
+                                    <span>{{ session.get('header_info', {}).get('college_name', 'N/A') }}</span>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-book"></i>
+                                <div>
+                                    <strong>Course:</strong>
+                                    <span>{{ session.get('header_info', {}).get('course_name', 'N/A') }} ({{ session.get('header_info', {}).get('course_code', 'N/A') }})</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading -->
+                    <div class="loading-container" id="loadingContainer" style="display: none;">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <h3>Generating Question Paper...</h3>
+                            <p>Please wait while we analyze and select questions</p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{{ url_for('step3_options') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Previous Page
+                        </a>
+                        <button type="submit" class="btn-primary btn-generate" id="generateBtn">
+                            <i class="fas fa-magic"></i> Generate Question Paper
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('previousPapers');
+        const fileList = document.getElementById('fileList');
+        const fileItems = document.getElementById('fileItems');
+        const clearAllBtn = document.getElementById('clearAll');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingContainer = document.getElementById('loadingContainer');
+        
+        let selectedFiles = [];
+
+        fileInput.addEventListener('change', function(e) {
+            selectedFiles = Array.from(this.files);
+            updateFileList();
+        });
+
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            
+            if (e.dataTransfer.files.length > 0) {
+                const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+                selectedFiles = [...selectedFiles, ...newFiles];
+                updateFileList();
+            }
+        });
+
+        function updateFileList() {
+            if (selectedFiles.length > 0) {
+                dropZone.style.display = 'none';
+                fileList.style.display = 'block';
+                
+                fileItems.innerHTML = selectedFiles.map((file, index) => `
+                    <div class="file-item">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>${file.name}</span>
+                        <button type="button" class="btn-remove" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.btn-remove').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        selectedFiles.splice(index, 1);
+                        updateFileList();
+                    });
+                });
+            } else {
+                dropZone.style.display = 'block';
+                fileList.style.display = 'none';
+            }
+        }
+
+        clearAllBtn.addEventListener('click', function() {
+            selectedFiles = [];
+            fileInput.value = '';
+            updateFileList();
+        });
+
+        document.getElementById('generateForm').addEventListener('submit', function(e) {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            fileInput.files = dataTransfer.files;
+            
+            loadingContainer.style.display = 'flex';
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        });
+    </script>
+</body>
+</html>
+

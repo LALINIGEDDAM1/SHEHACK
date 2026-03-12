@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Question Generator - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+        }
+        
+        /* Left Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255,255,255,0.95);
+            min-height: 100vh;
+            padding: 30px 20px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+        
+        .sidebar-brand i {
+            color: #667eea;
+            font-size: 28px;
+        }
+        
+        .sidebar-menu {
+            flex: 1;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .menu-item:hover {
+            background: #f0f0f0;
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .menu-item i {
+            font-size: 20px;
+            width: 24px;
+        }
+        
+        .sidebar-footer {
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #dc3545;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #fee;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+        
+        .page-header h1 {
+            font-size: 32px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .page-header p {
+            color: rgba(255,255,255,0.8);
+            font-size: 16px;
+        }
+        
+        /* Flash Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+        }
+        
+        .flash-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .flash-card-static {
+            cursor: default;
+        }
+        
+        .flash-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+        }
+        
+        .flash-card-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 40px;
+        }
+        
+        .flash-card:first-child .flash-card-icon {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .flash-card:last-child .flash-card-icon {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        
+        .flash-card h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .flash-card p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        /* Features Section */
+        .features-section {
+            margin-top: 60px;
+        }
+        
+        .features-section h2 {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+        }
+        
+        .feature-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+        }
+        
+        .feature-card i {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .feature-card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-card p {
+            font-size: 13px;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-graduation-cap"></i>
+            <span>AI Generator</span>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <a href="{{ url_for('home') }}" class="menu-item active">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+            <a href="{{ url_for('question_bank') }}" class="menu-item">
+                <i class="fas fa-database"></i>
+                Question Bank
+            </a>
+            <a href="{{ url_for('step1_upload') }}" class="menu-item">
+                <i class="fas fa-file-alt"></i>
+                Question Paper
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="/" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <a href="{{ url_for('index') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Previous Page
+            </a>
+            <h1>AI-Powered Question Bank and Paper Generation</h1>
+            <p>Select an option to get started</p>
+        </div>
+        
+        <!-- Flash Cards -->
+        <div class="cards-grid">
+            <div class="flash-card flash-card-static" aria-disabled="true">
+                <div class="flash-card-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h2>Question Bank Generator</h2>
+                <p>Upload your textbook and syllabus PDF, and let AI generate a comprehensive question bank with proper CO, RBT levels, and difficulty mapping.</p>
+            </div>
+            
+            <div class="flash-card flash-card-static" aria-disabled="true">
+                <div class="flash-card-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h2>Question Paper Generator</h2>
+                <p>Upload a CSV question bank and generate well-balanced question papers with customizable difficulty and RBT level distribution.</p>
+            </div>
+        </div>
+        
+        <!-- Features -->
+        <div class="features-section">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI-Powered</h3>
+                    <p>Generate questions from study materials using advanced AI</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-sliders-h"></i>
+                    <h3>Customizable</h3>
+                    <p>Control difficulty and RBT taxonomy distribution</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-history"></i>
+                    <h3>LSTM Analysis</h3>
+                    <p>Avoid repeating questions from previous papers</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-download"></i>
+                    <h3>Export Options</h3>
+                    <p>Download papers in PDF or CSV format</p>
+                </div>
+        </div>
+    </main>
+</body>
+</html>

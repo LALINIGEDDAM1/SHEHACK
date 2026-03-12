@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Info & Options - Step 3</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Upload CSV</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Configure</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Header Info</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step active">
+                <div class="step-icon">4</div>
+                <span>Generate</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">5</div>
+                <span>Results</span>
+            </div>
+
+        <header class="page-header">
+            <a href="{{ url_for('step2_configure') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Previous Page
+            </a>
+            <h1><i class="fas fa-clipboard-list"></i> Header & Generation Options</h1>
+            <p class="step-description">Step 3 of 5 - Enter header information and choose generation mode</p>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <form method="POST" class="options-form">
+                    <!-- Header Information -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-university"></i> Question Paper Header</h3>
+                        <p class="section-hint">This information will appear on your question paper</p>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="college_name">
+                                    <i class="fas fa-school"></i> College Name
+                                </label>
+                                <input type="text" id="college_name" name="college_name" 
+                                       placeholder="Enter college name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="course_name">
+                                    <i class="fas fa-book"></i> Course Name
+                                </label>
+                                <input type="text" id="course_name" name="course_name" 
+                                       placeholder="Enter course name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="course_code">
+                                    <i class="fas fa-code"></i> Course Code
+                                </label>
+                                <input type="text" id="course_code" name="course_code" 
+                                       placeholder="e.g., CS301" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generation Mode -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-magic"></i> Generation Mode</h3>
+                        <p class="section-hint">Choose how you want to generate the question paper</p>
+                        
+                        <div class="mode-cards">
+                            <label class="mode-card selected" id="autoCard">
+                                <input type="radio" name="generation_mode" value="auto" checked>
+                                <div class="mode-icon">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="mode-content">
+                                    <h4>Auto-Balanced Generation</h4>
+                                    <ul>
+                                        <li><i class="fas fa-check"></i> Easy, Medium, Hard in equal ratio</li>
+                                        <li><i class="fas fa-check"></i> All 6 RBT levels equally covered</li>
+                                        <li><i class="fas fa-check"></i> Syllabus equally distributed</li>
+                                        <li><i class="fas fa-check"></i> Upload previous year papers to avoid repeats</li>
+                                    </ul>
+                                </div>
+                                <div class="radio-indicator">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </label>
+
+                            <label class="mode-card" id="customCard">
+                                <input type="radio" name="generation_mode" value="custom">
+                                <div class="mode-icon">
+                                    <i class="fas fa-user-cog"></i>
+                                </div>
+                                <div class="mode-content">
+                                    <h4>Custom Selection</h4>
+                                    <ul>
+                                        <li><i class="fas fa-check"></i> Customize difficulty percentages</li>
+                                        <li><i class="fas fa-check"></i> Customize RBT level percentages</li>
+                                        <li><i class="fas fa-check"></i> Full control over selection</li>
+                                        <li><i class="fas fa-check"></i> Set your own distribution</li>
+                                    </ul>
+                                </div>
+                                <div class="radio-indicator">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{{ url_for('step2_configure') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Previous Page
+                        </a>
+                        <button type="submit" class="btn-primary btn-next">
+                            <i class="fas fa-arrow-right"></i> Continue
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mode card selection
+        const modeCards = document.querySelectorAll('.mode-card');
+        
+        modeCards.forEach(card => {
+            card.addEventListener('click', function() {
+                modeCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                this.querySelector('input').checked = true;
+            });
+        });
+    </script>
+</body>
+</html>

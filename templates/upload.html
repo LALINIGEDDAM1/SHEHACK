@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Question Bank - Step 1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Upload CSV</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step active">
+                <div class="step-icon">2</div>
+                <span>Configure</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">3</div>
+                <span>Header Info</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">4</div>
+                <span>Generate</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">5</div>
+                <span>Results</span>
+            </div>
+        </div>
+
+        <header class="page-header">
+            <a href="{{ url_for('home') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Previous Page
+            </a>
+            <h1><i class="fas fa-upload"></i> Upload Question Bank</h1>
+            <p class="step-description">Step 1 of 5 - Upload your CSV file containing questions</p>
+        </header>
+
+        <main>
+            <div class="form-container">
+                {% if error %}
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data" class="upload-form">
+                    <div class="upload-area-wrapper">
+                        <div class="file-drop-zone" id="dropZone">
+                            <input type="file" name="csv_file" id="csvFile" accept=".csv" required>
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h3>Drag & Drop your CSV file here</h3>
+                            <p>or click to browse</p>
+                            <div class="file-types">
+                                <span class="file-badge">CSV</span>
+                            </div>
+                        </div>
+                        <div class="file-info" id="fileInfo" style="display: none;">
+                            <i class="fas fa-file-csv"></i>
+                            <span id="fileName"></span>
+                            <button type="button" class="btn-remove-file" id="removeFile">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="format-hint">
+                        <h4><i class="fas fa-info-circle"></i> Required CSV Columns:</h4>
+                        <ul>
+                            <li><strong>Question</strong> - The question text</li>
+                            <li><strong>Marks</strong> - Marks (2, 5, 10, 15, 20)</li>
+                            <li><strong>RBT Level</strong> - Remembering, Understanding, Applying, Analyzing, Evaluating, Creating</li>
+                            <li><strong>Difficulty</strong> - Easy, Medium, Hard</li>
+                            <li><strong>CO</strong> - Course Outcome (CO1-CO5)</li>
+                            <li><strong>Topic</strong> - Topic name</li>
+                            <li><strong>Unit</strong> - Unit number (1-5)</li>
+                            <li><strong>Type</strong> - MCQ or Theory</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{{ url_for('home') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-arrow-right"></i> Next Step
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('csvFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const removeFileBtn = document.getElementById('removeFile');
+
+        fileInput.addEventListener('change', function(e) {
+            if (this.files[0]) {
+                showFileInfo(this.files[0].name);
+            }
+        });
+
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            
+            if (e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                showFileInfo(e.dataTransfer.files[0].name);
+            }
+        });
+
+        function showFileInfo(name) {
+            dropZone.style.display = 'none';
+            fileInfo.style.display = 'flex';
+            fileName.textContent = name;
+        }
+
+        removeFileBtn.addEventListener('click', function() {
+            fileInput.value = '';
+            dropZone.style.display = 'block';
+            fileInfo.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
+

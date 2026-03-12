@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Question Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        
+        .login-container { width: 100%; max-width: 460px; padding: 20px; }
+        .back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .login-header { text-align: center; margin-bottom: 30px; }
+        .login-header i { font-size: 48px; color: #667eea; margin-bottom: 15px; }
+        .login-header h1 { font-size: 24px; color: #333; margin-bottom: 8px; }
+        .login-header p { color: #666; font-size: 14px; }
+
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: #f1f3f7;
+            border-radius: 10px;
+            padding: 6px;
+            margin-bottom: 20px;
+        }
+        .auth-tab {
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            background: transparent;
+            color: #444;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .auth-tab.active {
+            background: #fff;
+            color: #1e3c72;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; }
+        .form-group input { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; transition: border-color 0.3; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .hidden { display: none; }
+        .auth-message {
+            margin-bottom: 14px;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            display: none;
+        }
+        .auth-message.error { background: #fdecec; color: #9b1c1c; }
+        .auth-message.success { background: #e8f7ee; color: #166534; }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3;
+        }
+        .btn-login:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <a href="#" class="back-nav" onclick="window.history.back(); return false;">
+            <i class="fas fa-arrow-left"></i> Previous Page
+        </a>
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>AI Question Generator</h1>
+                <p id="authSubtitle">Sign in to continue</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" id="signInTab">Sign In</button>
+                <button type="button" class="auth-tab" id="signUpTab">Sign Up</button>
+            </div>
+
+            <div id="authMessage" class="auth-message"></div>
+
+            <form id="authForm">
+                <div class="form-group hidden" id="nameGroup">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" id="name" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <div class="form-group hidden" id="confirmPasswordGroup">
+                    <label><i class="fas fa-lock"></i> Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm your password">
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> <span id="authButtonText">Sign In</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const authForm = document.getElementById('authForm');
+        const signInTab = document.getElementById('signInTab');
+        const signUpTab = document.getElementById('signUpTab');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const authButtonText = document.getElementById('authButtonText');
+        const nameGroup = document.getElementById('nameGroup');
+        const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+        const nameInput = document.getElementById('name');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const authMessage = document.getElementById('authMessage');
+
+        let mode = 'signin';
+
+        function readUsers() {
+            try {
+                return JSON.parse(localStorage.getItem('aqg_users') || '{}');
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function writeUsers(users) {
+            localStorage.setItem('aqg_users', JSON.stringify(users));
+        }
+
+        function showMessage(text, type) {
+            authMessage.textContent = text;
+            authMessage.className = 'auth-message ' + type;
+            authMessage.style.display = 'block';
+        }
+
+        function clearMessage() {
+            authMessage.style.display = 'none';
+            authMessage.textContent = '';
+            authMessage.className = 'auth-message';
+        }
+
+        function setMode(nextMode) {
+            mode = nextMode;
+            clearMessage();
+            if (mode === 'signup') {
+                signUpTab.classList.add('active');
+                signInTab.classList.remove('active');
+                nameGroup.classList.remove('hidden');
+                confirmPasswordGroup.classList.remove('hidden');
+                nameInput.required = true;
+                confirmPasswordInput.required = true;
+                authSubtitle.textContent = 'Create an account to continue';
+                authButtonText.textContent = 'Sign Up';
+            } else {
+                signInTab.classList.add('active');
+                signUpTab.classList.remove('active');
+                nameGroup.classList.add('hidden');
+                confirmPasswordGroup.classList.add('hidden');
+                nameInput.required = false;
+                confirmPasswordInput.required = false;
+                authSubtitle.textContent = 'Sign in to continue';
+                authButtonText.textContent = 'Sign In';
+            }
+        }
+
+        signInTab.addEventListener('click', function() { setMode('signin'); });
+        signUpTab.addEventListener('click', function() { setMode('signup'); });
+
+        authForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const users = readUsers();
+
+            if (mode === 'signup') {
+                const fullName = nameInput.value.trim();
+                const confirmPassword = confirmPasswordInput.value;
+
+                if (!fullName) {
+                    showMessage('Please enter your full name.', 'error');
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    showMessage('Passwords do not match.', 'error');
+                    return;
+                }
+                if (users[email]) {
+                    showMessage('Account already exists. Please sign in.', 'error');
+                    return;
+                }
+
+                users[email] = { name: fullName, password: password };
+                writeUsers(users);
+                showMessage('Account created. Please sign in.', 'success');
+                authForm.reset();
+                setMode('signin');
+                document.getElementById('email').value = email;
+                return;
+            }
+
+            if (!users[email] || users[email].password !== password) {
+                showMessage('Invalid email or password.', 'error');
+                return;
+            }
+
+            localStorage.setItem('aqg_current_user', email);
+            window.location.href = '/index';
+        });
+    </script>
+</body>
+</html>

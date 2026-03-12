@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Questions - Step 2</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Upload CSV</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Configure</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step active">
+                <div class="step-icon">3</div>
+                <span>Header Info</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">4</div>
+                <span>Generate</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-icon">5</div>
+                <span>Results</span>
+            </div>
+        </div>
+
+        <header class="page-header">
+            <a href="{{ url_for('step1_upload') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Previous Page
+            </a>
+            <h1><i class="fas fa-cog"></i> Configure Questions</h1>
+            <p class="step-description">Step 2 of 5 - Set number of questions and type</p>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <form method="POST" class="config-form">
+                    <!-- Basic Configuration -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-sliders-h"></i> Basic Configuration</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="num_questions">
+                                    <i class="fas fa-hashtag"></i> Number of Questions
+                                </label>
+                                <input type="number" id="num_questions" name="num_questions" 
+                                       min="1" max="100" value="{{ num_questions }}" required>
+                                <small>Available questions: {{ questions_count }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Distribution Info -->
+                    <div class="config-section">
+                        <h3><i class="fas fa-info-circle"></i> Distribution Settings</h3>
+                        <p class="section-hint">How will questions be distributed?</p>
+                        
+                        <div class="format-hint">
+                            <ul>
+                                <li>
+                                    <strong><i class="fas fa-magic"></i> Auto-Balanced Mode:</strong>
+                                    Easy, Medium, Hard in equal ratio + All 6 RBT levels equally covered
+                                </li>
+                                <li>
+                                    <strong><i class="fas fa-user-cog"></i> Custom Mode:</strong>
+                                    You can customize percentages for difficulty and RBT levels
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="alert alert-success">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>Next Step:</strong> After this, you'll set header info and choose between Auto or Custom generation mode.
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{{ url_for('step1_upload') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Previous Page
+                        </a>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-arrow-right"></i> Next Step
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,61 @@
+ID,Question,Marks,RBT Level,Difficulty Level,Course Outcomes,Topic Name,Unit Name
+60,What are the best practices for deploying and maintaining an NLP system?,10,creating,hard,"CO19, CO20",Deploying and Maintaining NLP Systems,Bringing It All Together
+59,"Describe the applications of NLP in healthcare, finance, and law.",12,understanding,hard,"CO17, CO18","NLP in Healthcare, Finance, and Law",Applied NLP
+58,Explain the role of NLP in e-commerce and retail.,10,applying,medium,"CO15, CO16",NLP in E-commerce,Applied NLP
+57,What are the challenges and opportunities of applying NLP in social media?,8,understanding,medium,"CO13, CO14",NLP in Social Media,Applied NLP
+56,Describe the architecture of a chatbot and its components.,12,creating,hard,"CO11, CO12",Chatbots,Applied NLP
+55,Explain the concept of Information Extraction (IE) and its types.,10,understanding,hard,"CO9, CO10",Information Extraction,Essentials of NLP
+54,What are the applications of Text Classification in real-world scenarios?,5,remembering,easy,"CO7, CO8",Text Classification,Essentials of NLP
+53,Describe the process of text representation in NLP.,8,applying,medium,"CO5, CO6",Text Representation,Essentials of NLP
+52,Explain the difference between Machine Learning and Deep Learning in the context of NLP.,10,understanding,medium,"CO3, CO4",Machine Learning and Deep Learning,NLP Pipeline
+51,What are the primary challenges in Natural Language Processing (NLP)?,5,understanding,easy,"CO1, CO2",NLP Challenges,Foundations of NLP
+50,What are the key aspects of proofreader and its importance in building real-world NLP systems?,5,understanding,easy,"CO79, CO80",Proofreader,Bringing It All Together
+49,Describe the process of building a copyeditor and its importance in building real-world NLP systems.,10,creating,hard,"CO77, CO78",Copyeditor,Bringing It All Together
+48,Explain the concept of production editor and its importance in building real-world NLP systems.,10,understanding,medium,"CO75, CO76",Production Editor,Bringing It All Together
+47,What are the key aspects of publisher and its importance in building real-world NLP systems?,5,remembering,easy,"CO73, CO74",Publisher,Bringing It All Together
+46,Describe the process of building a book and its importance in building real-world NLP systems.,10,creating,hard,"CO71, CO72",Book,Bringing It All Together
+45,Explain the concept of copyright and its importance in building real-world NLP systems.,10,applying,medium,"CO69, CO70",Copyright,Bringing It All Together
+44,What are the key aspects of about the authors and its importance in building real-world NLP systems?,5,understanding,easy,"CO67, CO68",About the Authors,Bringing It All Together
+43,Describe the process of building a dedication and its importance in building real-world NLP systems.,10,creating,hard,"CO65, CO66",Dedication,Bringing It All Together
+42,Explain the concept of acknowledgments and its importance in building real-world NLP systems.,10,understanding,medium,"CO63, CO64",Acknowledgments,Bringing It All Together
+41,What are the key aspects of preface and its importance in building real-world NLP systems?,5,remembering,easy,"CO61, CO62",Preface,Bringing It All Together
+40,Describe the process of building a foreword and its importance in building real-world NLP systems.,10,creating,hard,"CO59, CO60",Foreword,Bringing It All Together
+39,Explain the concept of table of contents and its importance in building real-world NLP systems.,10,applying,medium,"CO57, CO58",Table of Contents,Bringing It All Together
+38,What are the key aspects of index and its importance in building real-world NLP systems?,5,understanding,easy,"CO55, CO56",Index,Bringing It All Together
+37,Describe the process of building a comprehensive guide to building real-world NLP systems.,10,creating,hard,"CO53, CO54",Comprehensive Guide to NLP,Bringing It All Together
+36,Explain the concept of final words and its importance in building real-world NLP systems.,10,understanding,medium,"CO51, CO52",Final Words,Bringing It All Together
+35,What are the key aspects of peaking over the horizon and looking for future developments in NLP?,5,remembering,easy,"CO49, CO50",Peeking over the Horizon,Bringing It All Together
+34,Describe the process of building a mature NLP system and its importance in real-world applications.,10,creating,hard,"CO47, CO48",Building a Mature NLP System,Bringing It All Together
+33,Explain the concept of monitoring and troubleshooting in building real-world NLP systems.,10,applying,medium,"CO45, CO46",Monitoring and Troubleshooting,Bringing It All Together
+32,What are the key aspects of minimizing technical debt and ensuring code and model reproducibility?,5,understanding,easy,"CO43, CO44",Minimizing Technical Debt,Bringing It All Together
+31,Describe the process of automating machine learning and its importance in building real-world NLP systems.,10,creating,hard,"CO41, CO42",Automating Machine Learning,Bringing It All Together
+30,Explain the concept of team data science process and its importance in building real-world NLP systems.,10,understanding,medium,"CO39, CO40",Team Data Science Process,Bringing It All Together
+29,What are the key aspects of making AI succeed at an organization?,5,remembering,easy,"CO37, CO38",Making AI Succeed,Bringing It All Together
+28,Describe the process of deploying NLP software and maintaining a mature system.,10,creating,hard,"CO35, CO36",Deploying NLP Software,Bringing It All Together
+27,Explain the concept of the end-to-end NLP process and its importance in building real-world NLP systems.,10,applying,medium,"CO33, CO34",End-to-End NLP Process,Bringing It All Together
+26,"What are the applications of NLP in healthcare, finance, and law?",5,understanding,easy,"CO31, CO32","NLP in Healthcare, Finance, and Law",Applied NLP
+25,Describe the process of building a question-answering system.,10,creating,hard,"CO29, CO30",Question-Answering Systems,Applied NLP
+24,Explain the concept of machine translation and its importance in NLP.,10,understanding,medium,"CO27, CO28",Machine Translation,Applied NLP
+23,What are the applications of NLP in e-commerce and retail?,5,remembering,easy,"CO25, CO26",NLP in E-commerce,Applied NLP
+22,Describe the process of building a recommender system for textual data.,10,creating,hard,"CO23, CO24",Recommender Systems,Applied NLP
+21,Explain the concept of sentiment analysis and its importance in NLP.,10,applying,medium,"CO21, CO22",Sentiment Analysis,Applied NLP
+20,What are the applications of NLP in social media?,5,understanding,easy,"CO19, CO20",NLP in Social Media,Applied NLP
+19,Describe the process of building a dialog system.,10,creating,hard,"CO17, CO18",Dialog Systems,Essentials of NLP
+18,Explain the concept of chatbots and their applications.,10,understanding,medium,"CO15, CO16",Chatbots,Essentials of NLP
+17,"What is information extraction, and what are its different types?",5,remembering,easy,"CO13, CO14",Information Extraction,Essentials of NLP
+16,Describe the process of building a text classification system.,10,creating,hard,"CO11, CO12",Text Classification,Essentials of NLP
+15,Explain the concept of word embeddings and their importance in NLP.,10,applying,medium,"CO9, CO10",Word Embeddings,Essentials of NLP
+14,"What is text representation in NLP, and what are its different types?",5,understanding,easy,"CO7, CO8",Text Representation,Essentials of NLP
+13,Describe the NLP pipeline and its various stages.,10,creating,hard,"CO5, CO6",NLP Pipeline,Foundations of NLP
+12,Explain the difference between machine learning and deep learning in the context of NLP.,10,understanding,hard,"CO3, CO4",NLP Approaches,Foundations of NLP
+11,What are the key challenges in building real-world NLP systems?,5,understanding,medium,"CO1, CO2",NLP Challenges,Foundations of NLP
+10,What are the best practices for deploying and maintaining an NLP system?,10,creating,hard,"CO15, CO16",Deploying and Maintaining NLP Systems,Bringing It All Together
+9,"Describe the applications of NLP in Healthcare, Finance, and Law.",10,understanding,medium,"CO13, CO14","NLP in Healthcare, Finance, and Law",Applied NLP
+8,Explain the role of NLP in E-Commerce and Retail.,5,applying,easy,CO12,NLP in E-Commerce and Retail,Applied NLP
+7,What are the challenges and opportunities of applying NLP in Social Media?,5,understanding,easy,CO11,NLP in Social Media,Applied NLP
+6,Describe the architecture of a Chatbot and its components.,10,creating,hard,"CO9, CO10",Chatbots,Essentials of NLP
+5,Explain the concept of Information Extraction (IE) and its types.,10,understanding,medium,"CO7, CO8",Information Extraction,Essentials of NLP
+4,What are the applications of Text Classification in real-world scenarios?,5,applying,easy,CO6,Text Classification,Essentials of NLP
+3,Describe the process of text representation in NLP.,5,remembering,easy,CO5,Text Representation,Essentials of NLP
+2,Explain the difference between Machine Learning and Deep Learning in the context of NLP.,10,understanding,medium,"CO3, CO4",Machine Learning and Deep Learning,NLP Pipeline
+1,What are the key challenges in Natural Language Processing (NLP)?,5,understanding,easy,"CO1, CO2",NLP Challenges,Foundations of NLP

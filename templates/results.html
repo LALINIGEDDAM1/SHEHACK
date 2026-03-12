@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Question Paper Generated</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Upload CSV</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Configure</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Header Info</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Generate</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>Results</span>
+            </div>
+        </div>
+
+        <header class="page-header">
+            <a href="{{ url_for('step4_generate') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Previous Page
+            </a>
+            <h1><i class="fas fa-check-circle"></i> Question Paper Generated!</h1>
+            <p class="step-description">Your question paper is ready - review, edit, and download</p>
+        </header>
+
+        <main>
+            <!-- Question Paper Preview -->
+            <div class="question-paper">
+                <div class="paper-header">
+                    <div class="college-name">{{ header_info.college_name }}</div>
+                    <div class="exam-info">
+                        <h2>Question Paper</h2>
+                        <div class="course-details">
+                            <p><strong>Course:</strong> {{ header_info.course_name }}</p>
+                            <p><strong>Course Code:</strong> {{ header_info.course_code }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="questions-list" id="questionsList">
+                    {% for q in questions %}
+                    <div class="paper-question" data-id="{{ loop.index0 }}">
+                        <div class="question-header-row">
+                            <span class="q-number">{{ loop.index }}.</span>
+                            <span class="q-marks">[{{ q.marks }} Marks]</span>
+                            <span class="q-co">{{ q.co }}</span>
+                            <span class="q-rbt">{{ q.rbt_level }}</span>
+                            <button type="button" class="btn-edit-q" onclick="editQuestion({{ loop.index0 }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <div class="question-text">{{ q.question }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="results-actions">
+                <button class="btn-dashboard" onclick="showDashboard()">
+                    <i class="fas fa-chart-pie"></i> View Dashboard
+                </button>
+                <button class="btn-secondary" onclick="addNewQuestion()">
+                    <i class="fas fa-plus"></i> Add Question
+                </button>
+                <button class="btn-success" onclick="downloadPDF()">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
+            </div>
+
+            <!-- Dashboard Modal -->
+            <div class="dashboard-modal" id="dashboardModal">
+                <div class="dashboard-content">
+                    <div class="dashboard-header">
+                        <h2><i class="fas fa-chart-pie"></i> Question Distribution Dashboard</h2>
+                        <button class="dashboard-close" onclick="closeDashboard()">&times;</button>
+                    </div>
+                    <div class="dashboard-body">
+                        <div class="chart-grid">
+                            <div class="chart-card">
+                                <h3>Difficulty Distribution</h3>
+                                <canvas id="difficultyChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>RBT Level Distribution</h3>
+                                <canvas id="rbtChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Course Outcome (CO) Distribution</h3>
+                                <canvas id="coChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Unit Distribution</h3>
+                                <canvas id="unitChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Marks Distribution</h3>
+                                <canvas id="marksChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h3>Total Questions</h3>
+                                <canvas id="totalChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Question Modal -->
+            <div class="edit-modal" id="editModal">
+                <div class="edit-modal-content">
+                    <div class="edit-modal-header">
+                        <h3>Edit Question</h3>
+                        <button class="edit-close" onclick="closeEditModal()">&times;</button>
+                    </div>
+                    <div class="edit-modal-body">
+                        <input type="hidden" id="editIndex">
+                        <div class="form-group">
+                            <label>Question</label>
+                            <textarea id="editQuestion" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Marks</label>
+                                <select id="editMarks">
+                                    <option value="2">2</option>
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>CO</label>
+                                <select id="editCO">
+                                    <option value="CO1">CO1</option>
+                                    <option value="CO2">CO2</option>
+                                    <option value="CO3">CO3</option>
+                                    <option value="CO4">CO4</option>
+                                    <option value="CO5">CO5</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Unit</label>
+                                <select id="editUnit">
+                                    <option value="1">Unit 1</option>
+                                    <option value="2">Unit 2</option>
+                                    <option value="3">Unit 3</option>
+                                    <option value="4">Unit 4</option>
+                                    <option value="5">Unit 5</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select id="editType">
+                                    <option value="Theory">Theory</option>
+                                    <option value="MCQ">MCQ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="edit-modal-footer">
+                        <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+                        <button class="btn-primary" onclick="saveQuestion()">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let questionsData = {{ questions|tojson }};
+        let headerInfoData = {{ header_info|tojson }};
+        let questions = questionsData;
+
+        function showDashboard() {
+            document.getElementById('dashboardModal').style.display = 'flex';
+            generateCharts();
+        }
+
+        function closeDashboard() {
+            document.getElementById('dashboardModal').style.display = 'none';
+        }
+
+        function generateCharts() {
+            // Destroy existing charts
+            if (window.charts) {
+                Object.values(window.charts).forEach(chart => chart.destroy());
+            }
+            window.charts = {};
+
+            // Difficulty
+            const diffCounts = {Easy: 0, Medium: 0, Hard: 0};
+            questions.forEach(q => {
+                const diff = q.difficulty || 'Medium';
+                diffCounts[diff] = (diffCounts[diff] || 0) + 1;
+            });
+            createChart('difficultyChart', 'pie', Object.keys(diffCounts), Object.values(diffCounts), ['#10b981', '#f59e0b', '#ef4444']);
+
+            // RBT
+            const rbtCounts = {};
+            questions.forEach(q => {
+                const rbt = q.rbt_level || 'Understanding';
+                rbtCounts[rbt] = (rbtCounts[rbt] || 0) + 1;
+            });
+            createChart('rbtChart', 'doughnut', Object.keys(rbtCounts), Object.values(rbtCounts), 
+                ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444', '#ec4899']);
+
+            // CO
+            const coCounts = {};
+            questions.forEach(q => {
+                const co = q.co || 'CO1';
+                coCounts[co] = (coCounts[co] || 0) + 1;
+            });
+            createChart('coChart', 'bar', Object.keys(coCounts), Object.values(coCounts), ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444']);
+
+            // Unit
+            const unitCounts = {};
+            questions.forEach(q => {
+                const unit = 'Unit ' + (q.unit || 1);
+                unitCounts[unit] = (unitCounts[unit] || 0) + 1;
+            });
+            createChart('unitChart', 'doughnut', Object.keys(unitCounts), Object.values(unitCounts), 
+                ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444']);
+
+            // Marks
+            const marksCounts = {};
+            questions.forEach(q => {
+                const marks = q.marks || 5;
+                marksCounts[marks] = (marksCounts[marks] || 0) + 1;
+            });
+            createChart('marksChart', 'bar', Object.keys(marksCounts), Object.values(marksCounts), ['#667eea', '#764ba2', '#f59e0b', '#10b981', '#ef4444']);
+
+            // Total
+            createChart('totalChart', 'pie', ['Total Questions'], [questions.length], ['#667eea']);
+        }
+
+        function createChart(canvasId, type, labels, data, colors) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            window.charts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { position: type === 'bar' ? 'top' : 'bottom' } },
+                    scales: type === 'bar' ? { y: { beginAtZero: true } } : {}
+                }
+            });
+        }
+
+        function editQuestion(index) {
+            const q = questions[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('editQuestion').value = q.question;
+            document.getElementById('editMarks').value = q.marks;
+            document.getElementById('editCO').value = q.co;
+            document.getElementById('editUnit').value = q.unit;
+            document.getElementById('editType').value = q.question_type || 'Theory';
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function saveQuestion() {
+            const index = parseInt(document.getElementById('editIndex').value);
+            questions[index].question = document.getElementById('editQuestion').value;
+            questions[index].marks = parseInt(document.getElementById('editMarks').value);
+            questions[index].co = document.getElementById('editCO').value;
+            questions[index].unit = parseInt(document.getElementById('editUnit').value);
+            questions[index].question_type = document.getElementById('editType').value;
+            
+            // Update display
+            const qElements = document.querySelectorAll('.paper-question');
+            qElements[index].querySelector('.question-text').textContent = questions[index].question;
+            qElements[index].querySelector('.q-marks').textContent = '[' + questions[index].marks + ' Marks]';
+            qElements[index].querySelector('.q-co').textContent = questions[index].co;
+            
+            closeEditModal();
+        }
+
+        function addNewQuestion() {
+            const newQ = {
+                question: '',
+                marks: 5,
+                rbt_level: 'Understanding',
+                difficulty: 'Medium',
+                co: 'CO1',
+                topic: '',
+                unit: 1,
+                question_type: 'Theory'
+            };
+            questions.push(newQ);
+            
+            // Add to display
+            const list = document.getElementById('questionsList');
+            const div = document.createElement('div');
+            div.className = 'paper-question';
+            div.dataset.id = questions.length - 1;
+            div.innerHTML = `
+                <div class="question-header-row">
+                    <span class="q-number">${questions.length}.</span>
+                    <span class="q-marks">[5 Marks]</span>
+                    <span class="q-co">CO1</span>
+                    <span class="q-rbt">Understanding</span>
+                    <button type="button" class="btn-edit-q" onclick="editQuestion(${questions.length - 1})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="question-text"></div>
+            `;
+            list.appendChild(div);
+        }
+
+        function downloadCSV() {
+            const csvContent = generateCSV();
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'question_paper.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+
+        function downloadPDF() {
+            fetch('/download_pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    questions: questions,
+                    header_info: headerInfoData
+                })
+            })
+            .then(async response => {
+                const contentType = (response.headers.get('content-type') || '').toLowerCase();
+                const disposition = response.headers.get('content-disposition') || '';
+
+                if (!response.ok) {
+                    if (contentType.includes('application/json')) {
+                        const err = await response.json();
+                        throw new Error(err.error || 'Failed to download PDF');
+                    }
+                    throw new Error('Failed to download PDF');
+                }
+
+                if (!contentType.includes('application/pdf')) {
+                    throw new Error('Server did not return a PDF file');
+                }
+
+                const blob = await response.blob();
+                return { blob, disposition };
+            })
+            .then(({ blob, disposition }) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const filenameMatch = disposition.match(/filename="?([^"]+)"?/i);
+                a.download = filenameMatch ? filenameMatch[1] : 'question_paper.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            })
+            .catch(error => {
+                console.error('Error downloading PDF:', error);
+                alert('Error downloading PDF: ' + error.message);
+            });
+        }
+
+        function generateCSV() {
+            let csv = `# College: ${headerInfo.college_name}\n`;
+            csv += `# Course: ${headerInfo.course_name} (${headerInfo.course_code})\n`;
+            csv += `# Total Questions: ${questions.length}\n\n`;
+            csv += 'S.No,Question,Marks,RBT Level,Difficulty,CO,Topic,Unit,Type\n';
+            
+            questions.forEach((q, i) => {
+                const question = q.question.replace(/"/g, '""');
+                csv += `${i + 1},"${question}",${q.marks},${q.rbt_level},${q.difficulty},${q.co},${q.topic},${q.unit},${q.question_type || 'Theory'}\n`;
+            });
+            
+            return csv;
+        }
+
+        // Close modal on outside click
+        document.getElementById('dashboardModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDashboard();
+        });
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
+        });
+    </script>
+</body>
+</html>
+
