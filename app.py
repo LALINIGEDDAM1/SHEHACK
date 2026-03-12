@@ -104,8 +104,17 @@ def parse_csv_questions(csv_file):
     questions = []
     try:
         if hasattr(csv_file, 'read'):
-            content = csv_file.read().decode('utf-8')
-            reader = csv.DictReader(io.StringIO(content))
+            content = csv_file.read().decode('utf-8', errors='ignore')
+            lines = []
+            for line in content.splitlines():
+                if not line.strip():
+                    continue
+                if line.lstrip().startswith('#'):
+                    continue
+                lines.append(line)
+            if not lines:
+                return []
+            reader = csv.DictReader(io.StringIO("\n".join(lines)))
         else:
             with open(csv_file, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
@@ -114,20 +123,70 @@ def parse_csv_questions(csv_file):
             return questions
         
         for row in reader:
+            def safe_int(value, default):
+                try:
+                    return int(str(value).strip())
+                except Exception:
+                    return default
+
             normalized_row = {
                 'question': row.get('Question', row.get('question', '')),
-                'marks': int(row.get('Marks', row.get('marks', 5))),
-                'rbt_level': row.get('RBT Level', row.get('rbt_level', 'Understanding')),
-                'difficulty': row.get('Difficulty', row.get('difficulty', 'Medium')),
-                'co': row.get('CO', row.get('co', 'CO1')),
-                'topic': row.get('Topic', row.get('topic', '')),
-                'unit': int(row.get('Unit', row.get('unit', 1))),
-                'question_type': row.get('Type', row.get('type', 'Theory'))
+                'marks': safe_int(row.get('Marks', row.get('marks', 5)), 5),
+                'rbt_level': row.get('RBT Level', row.get('rbt_level', row.get('RBT', 'Understanding'))),
+                'difficulty': row.get('Difficulty Level', row.get('Difficulty', row.get('difficulty', 'Medium'))),
+                'co': row.get('CO', row.get('co', row.get('Course Outcomes', row.get('Course Outcome', 'CO1')))),
+                'topic': row.get('Topic', row.get('topic', row.get('Topic Name', ''))),
+                'unit': safe_int(row.get('Unit', row.get('unit', row.get('Unit Name', 1))), 1),
+                'question_type': row.get('Type', row.get('type', row.get('Question Type', 'Theory')))
             }
-            questions.append(normalized_row)
+            if str(normalized_row.get('question', '')).strip():
+                questions.append(normalized_row)
     except Exception as e:
         print(f"Error parsing CSV: {e}")
     return questions
+
+def _equal_bucket_counts(total, buckets):
+    base = total // len(buckets)
+    remainder = total % len(buckets)
+    counts = {b: base for b in buckets}
+    for i in range(remainder):
+        counts[buckets[i]] += 1
+    return counts
+
+def enforce_marks_distribution(questions, num_questions, mark_values=(1, 5, 10)):
+    counts = _equal_bucket_counts(num_questions, list(mark_values))
+    remaining = list(questions)
+    random.shuffle(remaining)
+    selected = []
+
+    for mark in mark_values:
+        matching = [q for q in remaining if int(q.get('marks', 0)) == mark]
+        random.shuffle(matching)
+        take = min(counts[mark], len(matching))
+        chosen = matching[:take]
+        selected.extend(chosen)
+        chosen_ids = set(id(q) for q in chosen)
+        remaining = [q for q in remaining if id(q) not in chosen_ids]
+        counts[mark] -= take
+
+    # Fill any shortages by reassigning marks to keep equal distribution.
+    for mark in mark_values:
+        need = counts[mark]
+        if need <= 0:
+            continue
+        take = min(need, len(remaining))
+        chosen = remaining[:take]
+        remaining = remaining[take:]
+        for q in chosen:
+            q['marks'] = mark
+        selected.extend(chosen)
+        counts[mark] -= take
+
+    while len(selected) < num_questions and remaining:
+        selected.append(remaining.pop())
+
+    random.shuffle(selected)
+    return selected[:num_questions]
 
 def select_questions_by_distribution(questions, num_questions, difficulty_pct, rbt_pct, question_type=None):
     if question_type and question_type != 'both':
@@ -162,6 +221,7 @@ def select_questions_by_distribution(questions, num_questions, difficulty_pct, r
     return selected[:num_questions]
 
 def generate_questions_ai(textbook_text, syllabus_text, num_questions, question_type):
+    mark_counts = _equal_bucket_counts(num_questions, [1, 5, 10])
     easy_count = num_questions // 3
     medium_count = num_questions // 3
     hard_count = num_questions - easy_count - medium_count
@@ -176,6 +236,7 @@ TEXTBOOK: {textbook_text[:4000]}
 Question Type: {question_type}
 
 REQUIRED: {easy_count} Easy, {medium_count} Medium, {hard_count} Hard.
+MARKS: {mark_counts[1]} questions of 1 mark, {mark_counts[5]} questions of 5 marks, {mark_counts[10]} questions of 10 marks.
 RBT: Equal distribution across 6 levels.
 CO: Equal distribution across CO1-CO5.
 Units: Equal distribution across 5 units.
@@ -194,7 +255,7 @@ Return JSON array with: question, marks, rbt_level, difficulty, co, topic, unit,
         if start_idx != -1 and end_idx != 0:
             json_str = response_text[start_idx:end_idx]
             questions = json.loads(json_str)
-            return questions
+            return enforce_marks_distribution(questions, num_questions, (1, 5, 10))
         else:
             raise ValueError("No JSON found")
     except Exception as e:
@@ -324,6 +385,7 @@ def step4_generate():
         rbt_pct = {'remembering': 0.17, 'understanding': 0.17, 'applying': 0.17, 'analyzing': 0.17, 'evaluating': 0.16, 'creating': 0.16}
         
         selected_questions = select_questions_by_distribution(all_questions, num_questions, difficulty_pct, rbt_pct, question_type)
+        selected_questions = enforce_marks_distribution(selected_questions, num_questions, (1, 5, 10))
         
         if previous_questions:
             filtered = [q for q in selected_questions if not lstm_model.is_duplicate(q, previous_questions)]
@@ -349,6 +411,7 @@ def step5_custom():
         num_questions = session.get('num_questions', 10)
         question_type = session.get('question_type', 'both')
         selected_questions = select_questions_by_distribution(all_questions, num_questions, difficulty_pct, rbt_pct, question_type)
+        selected_questions = enforce_marks_distribution(selected_questions, num_questions, (1, 5, 10))
         session['selected_questions'] = selected_questions
         return redirect(url_for('step6_results'))
     return render_template('custom.html', questions_count=len(session.get('all_questions', [])), num_questions=session.get('num_questions', 10))
