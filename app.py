@@ -25,6 +25,10 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20 MB limit for uploads
+
+MAX_PDF_PAGES = 25
+MAX_TEXT_CHARS = 120000
 
 # Allowed extensions
 ALLOWED_EXTENSIONS = {'csv', 'pdf'}
@@ -94,8 +98,18 @@ def extract_text_from_pdf(pdf_file):
     text = ""
     try:
         with pdfplumber.open(pdf_file) as pdf:
-            for page in pdf.pages:
-                text += page.extract_text() or ""
+            for i, page in enumerate(pdf.pages):
+                if i >= MAX_PDF_PAGES:
+                    break
+                try:
+                    page_text = page.extract_text() or ""
+                except Exception:
+                    page_text = ""
+                if page_text:
+                    text += page_text
+                if len(text) >= MAX_TEXT_CHARS:
+                    text = text[:MAX_TEXT_CHARS]
+                    break
     except Exception as e:
         print(f"Error extracting PDF: {e}")
     return text
@@ -282,6 +296,9 @@ def question_bank():
 @app.route('/generate', methods=['POST'])
 def generate_question_bank():
     try:
+        if request.content_length and request.content_length > app.config['MAX_CONTENT_LENGTH']:
+            return jsonify({'error': 'Uploaded files are too large. Please upload smaller PDFs (max 20MB).'}), 413
+
         if not GROQ_API_KEY:
             return jsonify({'error': 'GROQ_API_KEY is not set on the server. Please add it in Render Environment Variables.'}), 500
 
@@ -302,7 +319,7 @@ def generate_question_bank():
         syllabus_text = extract_text_from_pdf(syllabus_path)
         
         if not textbook_text or not syllabus_text:
-            return jsonify({'error': 'Could not extract text from PDFs'}), 400
+            return jsonify({'error': 'Could not extract text from PDFs. Try smaller files or fewer pages.'}), 400
         
         questions = generate_questions_ai(textbook_text, syllabus_text, num_questions, question_type)
         
