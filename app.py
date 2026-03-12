@@ -29,6 +29,8 @@ app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20 MB limit for uploads
 
 MAX_PDF_PAGES = 25
 MAX_TEXT_CHARS = 120000
+LITE_MODE_DEFAULT = os.getenv('LITE_MODE_DEFAULT', '0') == '1'
+LITE_MODE_STRICT = os.getenv('LITE_MODE_STRICT', '0') == '1'
 
 # Allowed extensions
 ALLOWED_EXTENSIONS = {'csv', 'pdf'}
@@ -98,10 +100,12 @@ def extract_text_from_pdf(pdf_file, lite_mode=False):
     text = ""
     try:
         if lite_mode:
+            lite_max_pages = min(MAX_PDF_PAGES, 10)
+            lite_max_chars = min(MAX_TEXT_CHARS, 60000)
             try:
                 import pypdfium2 as pdfium
                 pdf = pdfium.PdfDocument(pdf_file)
-                for i in range(min(len(pdf), MAX_PDF_PAGES)):
+                for i in range(min(len(pdf), lite_max_pages)):
                     page = pdf[i]
                     try:
                         textpage = page.get_textpage()
@@ -110,13 +114,15 @@ def extract_text_from_pdf(pdf_file, lite_mode=False):
                         page_text = ""
                     if page_text:
                         text += page_text
-                    if len(text) >= MAX_TEXT_CHARS:
-                        text = text[:MAX_TEXT_CHARS]
+                    if len(text) >= lite_max_chars:
+                        text = text[:lite_max_chars]
                         break
                 pdf.close()
                 return text
             except Exception as e:
                 print(f"Lite mode PDF extract failed, falling back: {e}")
+                if LITE_MODE_STRICT:
+                    return text
 
         with pdfplumber.open(pdf_file) as pdf:
             for i, page in enumerate(pdf.pages):
@@ -327,7 +333,7 @@ def generate_question_bank():
         syllabus = request.files.get('syllabus')
         num_questions = int(request.form.get('num_questions', 20))
         question_type = request.form.get('question_type', 'Theory')
-        lite_mode = request.form.get('lite_mode', '0') == '1'
+        lite_mode = request.form.get('lite_mode', '0') == '1' or LITE_MODE_DEFAULT
         
         if not textbook or not syllabus:
             return jsonify({'error': 'Please upload both PDFs'}), 400
