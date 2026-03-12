@@ -248,6 +248,9 @@ Return JSON array with: question, marks, rbt_level, difficulty, co, topic, unit,
         payload = {"model": "llama-3.1-8b-instant", "messages": [{"role": "user", "content": prompt}], "temperature": 0.7, "max_tokens": 4000}
         response = requests.post(GROQ_API_URL, headers=headers, json=payload, timeout=60)
         response.raise_for_status()
+        content_type = response.headers.get('content-type', '')
+        if 'application/json' not in content_type:
+            raise ValueError(f"Unexpected response type: {content_type}. Status: {response.status_code}")
         data = response.json()
         response_text = data['choices'][0]['message']['content']
         start_idx = response_text.find('[')
@@ -279,6 +282,9 @@ def question_bank():
 @app.route('/generate', methods=['POST'])
 def generate_question_bank():
     try:
+        if not GROQ_API_KEY:
+            return jsonify({'error': 'GROQ_API_KEY is not set on the server. Please add it in Render Environment Variables.'}), 500
+
         textbook = request.files.get('textbook')
         syllabus = request.files.get('syllabus')
         num_questions = int(request.form.get('num_questions', 20))
