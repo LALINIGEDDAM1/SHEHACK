@@ -1,48 +1,31 @@
-# TODO: Question Paper Generator - Implementation Plan
+# Backend Deployment to Render - TODO Steps
 
-## Summary of Understanding:
-- Current flow has difficulty and RBT sliders in Step 2 (configure.html)
-- User wants these sliders ONLY in Custom mode (custom.html)
-- Auto mode should automatically use equal percentages (33% each for Easy/Medium/Hard, equal for 6 RBT levels)
-- Custom mode should only show percentages, no question preview
-- Navigation buttons should be beside each other in custom mode
+## Plan Breakdown (Approved: GitHub https://github.com/LALINIGEDDAM1/SHEHACK, Frontend: https://question-paper-generator-bm7p.onrender.com/)
 
-## Changes Required:
+**✅ Completed:**
+- [x] Analyzed files (app.py Flask, deps, Procfile, render.yaml)
+- [x] Local test: Deps installed OK, app.py running on http://localhost:5000 (debug mode, active terminal)
+- [x] Created runtime.txt (python-3.12.4)
+- [x] Updated render.yaml (name: question-generator-backend, env GROQ_API_KEY/SECRET_KEY, 1GB uploads disk)
+- [x] Created requirements.txt.pinned (pinned stable versions)
 
-### 1. Configure.html (Step 2)
-- REMOVE: Difficulty percentage sliders
-- REMOVE: RBT level percentage sliders  
-- KEEP: Number of questions input
-- KEEP: Question type selection (MCQ/Theory/Both)
-- Add note explaining percentages will be set in Custom mode
+**⏳ Pending:**
+2. **Recommend**: mv requirements.txt.pinned requirements.txt (pin deps for Render).
+3. **Git Commit/Push**: git add . && git commit -m "Add runtime.txt, pinned reqs, render.yaml for backend deploy" && git push origin main.
+4. **Manual Deploy Steps** (do on render.com/dashboard):
+   - New → Web Service → Connect GitHub repo SHEHACK → Branch: main.
+   - Root Directory: / (CWD).
+   - Runtime: Python 3.
+   - Build: pip install -r requirements.txt
+   - Start: gunicorn app:app --workers 1 --bind 0.0.0.0:$PORT --timeout 120 (or auto from render.yaml/Procfile).
+   - Plan: Free (add disk needs Starter $7/mo).
+   - Env Vars: Add GROQ_API_KEY (your key), SECRET_KEY (auto-generate).
+   - Disks: uploads (1GB, /app/uploads).
+   - Deploy → Wait logs → Get URL e.g. https://question-generator-backend-abc.onrender.com
+5. **Test**: Visit backend URL (shows login.html), test /question_bank, POST /generate (needs API key).
+6. **Frontend Update**: If needed, update React to call backend APIs.
+7. **Cleanup**: Stop local server (Ctrl+C), monitor Render logs.
 
-### 2. Options.html (Step 3)
-- Add explanation that Auto mode uses equal distribution
-- Improve clarity on the two options
+**Next**: Run git status && git push (after mv reqs).
 
-### 3. Custom.html (Step 5 - Custom Mode)
-- Already has difficulty and RBT sliders (keep them)
-- REMOVE: Any question preview section
-- KEEP: Only percentages with sliders
-- Navigation buttons should be beside each other (already correct)
-
-### 4. Generate.html (Step 4 - Auto Mode)
-- Add info showing equal distribution will be used
-- Keep previous year papers upload for LSTM
-
-### 5. App.py (Backend)
-- Modify step2_configure: Don't save difficulty/rbt percentages
-- Modify step4_generate: Use equal percentages automatically
-- Modify step5_custom: Use custom percentages from form
-
-### 6. Results.html
-- Ensure course outcomes (CO1-CO5) are properly displayed
-- Already has CO display - verify it's correct
-
-## Implementation Steps:
-1. [x] Update configure.html - Remove difficulty/RBT sliders
-2. [x] Update generate.html - Add auto-balance info
-3. [x] Update custom.html - Already has only percentages (no changes needed)
-4. [x] Update app.py - Fix backend logic
-5. [x] Test the complete flow - Flask server running on http://127.0.0.1:5000
 
