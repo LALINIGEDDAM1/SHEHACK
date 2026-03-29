@@ -56,10 +56,3 @@ python main.py
 * GUI-based interface for teachers
 * Integration with educational platforms
 
-## 🤝 Contribution
-
-Contributions are welcome! Feel free to fork and improve.
-
-## 📄 License
-
-MIT License
