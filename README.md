@@ -5,6 +5,21 @@ live demo: https://question-paper-generator-bm7p.onrender.com/
 
 This project is an NLP-based system that automatically generates structured question papers from a given question bank or PDF input. It uses text processing and classification techniques to organize questions based on topics and difficulty levels.
 
+## ⚙️ Workflow
+
+1. Extract text from input PDF or dataset
+2. Preprocess text (cleaning, tokenization)
+3. Classify questions based on topics
+4. Assign difficulty levels
+5. Generate a structured question paper
+
+## 📊 Results
+
+* Achieved ~90% accuracy in topic classification
+* Efficient and consistent paper generation
+* Handles multiple subjects and formats
+
+
 ## 🚀 Features
 
 * Automatic question paper generation from PDF/question bank
@@ -20,20 +35,6 @@ This project is an NLP-based system that automatically generates structured ques
 * Scikit-learn
 * Pandas, NumPy
 * PDF processing libraries (PyPDF2 / pdfplumber)
-
-## ⚙️ Workflow
-
-1. Extract text from input PDF or dataset
-2. Preprocess text (cleaning, tokenization)
-3. Classify questions based on topics
-4. Assign difficulty levels
-5. Generate a structured question paper
-
-## 📊 Results
-
-* Achieved ~90% accuracy in topic classification
-* Efficient and consistent paper generation
-* Handles multiple subjects and formats
 
 ## ▶️ Installation
 
